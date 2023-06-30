@@ -8,7 +8,7 @@ entity PISO is
 	port(
 	parallel_in0, parallel_in1:	in std_logic_vector(Nb-1 downto 0);
 	clk, E, CL, LD:				in std_logic;
-	parallel_out:				out std_logic_vector(Nb-1 downto 0)
+	serial_out:				out std_logic_vector(Nb-1 downto 0)
 	);
 end PISO;
 
@@ -27,19 +27,21 @@ begin
 			state0 <= (others => '0');
 			state1 <= (others => '0');
 		else
-			if clk'event and clk = '1' and E = '1' then
+			if clk'event and clk = '1' then
 				if LD = '1' then
 					state0 <= in0_signal;
 					state1 <= in1_signal;
 				else
-					state0 <= state1;
-					state1 <= (others => '0');
+					if E = '1' then
+						state0 <= state1;
+						state1 <= (others => '0');
+					end if;						
 				end if;
 			end if;
 		end if;
 		
 	end process;
-	parallel_out <= state0;
+	serial_out <= state0;
 
 end PISO_bhv;
 

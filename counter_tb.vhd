@@ -18,14 +18,15 @@ component counter is
 	generic ( Nbit : integer );
 	port(
 	T: 			in std_logic;
-	clk:		in std_logic;
+	clk:		in std_logic; 
+	CL:			in std_logic;
 	out_count: 	out std_logic_vector(Nbit-1 downto 0)
 	);
 end component;
 
 constant clk_half_period: time := 10 ns;
 constant counter_nbit: integer := 3;
-signal clock: std_logic;
+signal clock, clear: std_logic;
 signal count: std_logic_vector(counter_nbit-1 downto 0);   
 
 begin
@@ -33,7 +34,13 @@ begin
 	clk_gen : clock_generator generic map (Half_period => clk_half_period) port map (clock);
 	
 	counter_tb : counter generic map (Nbit => counter_nbit)
-	port map('1', clock, count);
+	port map('1', clock, clear, count);
+	
+	process
+	begin
+		clear <= '1'; wait for 3 ns;
+		clear <= '0'; wait;
+	end process;
 
 end counter_tb_bhv;
 

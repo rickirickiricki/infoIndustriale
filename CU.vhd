@@ -10,7 +10,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-ENTITY testFSM IS
+ENTITY CU IS
   PORT( ----------------------------------->Cloclk & CL:
         clk:    IN std_logic;
         CL: IN std_logic;
@@ -18,13 +18,13 @@ ENTITY testFSM IS
         X:  IN std_logic;
         ----------------------------------->Outputs:
         ALU_s: OUT std_logic;
-        IOM_s: OUT std_logic;
-        COM_s: OUT std_logic
+        IO_s: OUT std_logic;
+        MODE_s: OUT std_logic
         -------------------------------------------
         );
-END testFSM;
+END CU;
 
-ARCHITECTURE behavioral OF testFSM IS       -- (Behavioral Description)
+ARCHITECTURE CU_bhv OF CU IS       -- (Behavioral Description)
   TYPE states is ( state_rx,
                    state_md,
                    state_b4,
@@ -79,23 +79,23 @@ BEGIN
   begin
     -- Set output defaults:
     ALU_s <= '0';
-    IOM_s <= '0';
-    COM_s <= '0';
+    IO_s <= '0';
+    MODE_s <= '0';
 
     -- Set output as function of current state and input:
     CASE State IS
       when state_rx =>
-                 COM_s <= '1';
+                 MODE_s <= '1';
       when state_b4 =>
                  ALU_s <= '1';
       when state_tx =>
-                 IOM_s <= '1';
-                 COM_s <= '1';
+                 IO_s <= '1';
+                 MODE_s <= '1';
       when OTHERS =>
                  ALU_s <= '0';
-                 IOM_s <= '0';
-                 COM_s <= '0';
+                 IO_s <= '0';
+                 MODE_s <= '0';
     END case;
   end process;
 
-END behavioral;
+END CU_bhv;
