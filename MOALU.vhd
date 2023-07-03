@@ -46,54 +46,39 @@ component PISO is
 	);
 end component;
 
-component CU IS
-  PORT( ----------------------------------->Cloclk & CL:
+component CU is
+  PORT( ----------------------------------->Cloclk & Reset:
         clk:    IN std_logic;
-        CL: IN std_logic;
+        Reset: IN std_logic;
         ----------------------------------->Inputs:
-        X:  IN std_logic;
+        X:   IN std_logic;
+        GE:  IN std_logic;
         ----------------------------------->Outputs:
         ALU_s: OUT std_logic;
-        IO_s: OUT std_logic;
-        MODE_s: OUT std_logic
+        EIN: OUT std_logic;
+        ELD: OUT std_logic;
+        EOU: OUT std_logic
         -------------------------------------------
         );
-END component;
+end component;
 
 -- Definizione dei segnali interni
 
 signal A, B: 				std_logic_vector(Nb-1 downto 0) := (others => '0');	 -- Segnali di input in uscita da REG_IN
 signal ALU_out0, ALU_out1: 	std_logic_vector(Nb-1 downto 0);  -- Segnali di risultato in uscita dalla ALU (0 meno significativa, 1 più)
-signal sel_alu, cu_ALU_s, IO_s, MODE_s: std_logic := '0'; -- Segnali di controllo in uscita dalla CU
-signal reg_in_e, reg_out_ld, reg_out_e: std_logic; -- segnali per la logica di controllo 
+signal ALU_s, EIN, ELD, EOU: std_logic := '0'; -- Segnali di controllo in uscita dalla CU
 signal clear: std_logic;
 
 begin
-	cu_component : CU port map (clk, g_reset, Cin, cu_ALU_s, IO_s, MODE_s);
+	cu_component : CU port map (clk, g_reset, Cin, g_enable, ALU_s, EIN, ELD, EOU);
 	
 	clear <= not(g_reset);
-	reg_in_e <= g_enable AND not(IO_s) AND MODE_s;
-	reg_out_ld <= g_enable AND not(MODE_s);
-	reg_out_e <= g_enable AND MODE_s AND IO_s;
 	
-	reg_in : SIPO generic map (Nb => Nb) port map(Bin, clk, reg_in_e, clear, B, A);	
+	reg_in : SIPO generic map (Nb => Nb) port map(Bin, clk, EIN, clear, B, A);	
 	
-	alu_component : ALU generic map (Nb => Nb) port map(A, B, sel_alu, ALU_out0, ALU_out1);
+	alu_component : ALU generic map (Nb => Nb) port map(A, B, ALU_s, ALU_out0, ALU_out1);
 	
-	reg_out : PISO generic map (Nb => Nb) port map (ALU_out0, ALU_out1, clk, reg_out_e, clear, reg_out_ld, Output);
-	
-	
-	process(clear, cu_ALU_s)
-	begin
-		if clear = '1' then
-			sel_alu <= '0';
-		else
-			if cu_ALU_s'event and g_enable = '1' then
-				sel_alu <= cu_ALU_s;
-			end if;
-		end if;
-		
-	end process;
+	reg_out : PISO generic map (Nb => Nb) port map (ALU_out0, ALU_out1, clk, EOU, clear, ELD, Output);
 	
 
 end MOALU_bhv;
